@@ -1,18 +1,26 @@
 # ldapauthenticator
-Simple LDAP Authenticator Plugin for JupyterHub
+Fork of LDAP Authenticator Plugin for JupyterHub. Tested on Active Directory.
 
 ## Installation ##
 
-You can install it from pip with:
-
-```
-pip install jupyterhub-ldapauthenticator
-```
+git clone and run setup.
 
 ## Requirements ##
 
-I've only tested with python3 - anyone willing to test with python2
-is welcome to do so! There's no reason it shouldn't work.
+Tested with python 3.4 with Active Directory.
+In this fork there is algorithm:
+
+-- user insert his `{username}` (ex: `sAMAccountName`) with `{password}`
+
+-- next we connect to AD with `{bind_user}` credentials 
+
+-- search this account by `{filter_base}` (ex: `sAMAccountName`)
+
+-- if it exist -> bind AD with founded user DN and `{password}` the answer is `True/False` and `groups`
+
+-- search first match of founded `groups` in `{allowed_groups}`
+
+-- return `{username}` or `None`  
 
 ## Usage ##
 
@@ -30,41 +38,41 @@ the LDAP Authenticator can be used:
 
 #### `LDAPAuthenticator.server_address` ####
 
-Address of the LDAP Server to contact. Just use a bare hostname or IP,
-without a port name or protocol prefix.
+Address of the LDAP Server to contact. Use like `ldap://ldap.test.local.`
 
-#### `LDAPAuthenticator.bind_dn_template` ####
+#### `LDAPAuthenticator.server_user` ####
 
-Template to use to generate the full dn for a user from the human readable
-username. For example, if users in your LDAP database have DN of the form
-`uid=Yuvipanda,ou=people,dc=wikimedia,dc=org` where Yuvipanda is the username,
-you would set this config item to be:
+Bind user of the LDAP Server to contact.
 
+#### `LDAPAuthenticator.server_password` ####
+
+Bind user password of the LDAP Server to contact. 
+
+#### `LDAPAuthenticator.filter_base` ####
+
+The filter pattern contains the attribute of user that it will place in username field. 
+
+```python
+c.LDAPAuthenticator.filter_base = '(&(objectClass=*)(sAMAccountName={0}))'
 ```
-c.LDAPAuthenticator.bind_dn_template = 'uid={username},ou=people,dc=wikimedia,dc=org'
-```
-
-Don't forget the preceeding `c.` for setting configuration parameters! JupyterHub
-uses [traitlets](https://traitlets.readthedocs.io) for configuration, and the `c` represents the [config object](https://traitlets.readthedocs.io/en/stable/config.html).
-
-The `{username}` is expanded into the username the user provides.
 
 ### Optional configuration ###
 
 #### `LDAPAuthenticator.allowed_groups` ####
 
+`!!!Only group names in this fork is needed!!!`
+
 LDAP groups whose members are allowed to log in. This must be
 set to either empty `[]` (the default, to disable) or to a list of
-full DNs that have a `member` attribute that includes the current
-user attempting to log in.
+groups names.
 
 As an example, to restrict access only to people in groups
 `researcher` or `operations`,
 
 ```python
 c.LDAPAuthenticator.allowed_groups = [
-    'cn=researcher,ou=groups,dc=wikimedia,dc=org',
-    'cn=operations,ou=groups,dc=wikimedia,dc=org'
+    'researcher',
+    'operations'
 ]
 ```
 
@@ -86,11 +94,34 @@ the LDAP server. Highly recommended that this be left to `True`
 #### `LDAPAuthenticator.server_port` ####
 
 Port to use to contact the LDAP server. Defaults to 389 if no SSL
-is being used, and 636 is SSL is being used.
+is being used, and 636 is SSL is being used. Do not forget about
+global configuration 3268 (3269).
+
+#### `LDAPAuthenticator.bind_dn_template` ####
+
+`!!!Do not used in this fork!!!`
+
+Template to use to generate the full dn for a user from the human readable
+username. For example, if users in your LDAP database have DN of the form
+`uid=Yuvipanda,ou=people,dc=wikimedia,dc=org` where Yuvipanda is the username,
+you would set this config item to be:
+
+```
+c.LDAPAuthenticator.bind_dn_template = 'uid={username},ou=people,dc=wikimedia,dc=org'
+```
+
+Don't forget the preceeding `c.` for setting configuration parameters! JupyterHub
+uses [traitlets](https://traitlets.readthedocs.io) for configuration, and the `c` represents the [config object](https://traitlets.readthedocs.io/en/stable/config.html).
+
+The `{username}` is expanded into the username the user provides.
+
 
 ## Compatibility ##
 
-This has been tested against an OpenLDAP server, with the client
-running Python 3.4. Verifications of this code workign well with
-other LDAP setups welcome, as are bug reports and patches to make
-it work with other LDAP setups!
+This has been tested against an Active Directory server, with the client
+running Python 3.4.
+
+
+## Future ##
+
+Delete all unneeded params.
