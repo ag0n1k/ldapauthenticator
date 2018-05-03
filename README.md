@@ -56,6 +56,14 @@ The filter pattern contains the attribute of user that it will place in username
 c.LDAPAuthenticator.filter_base = '(&(objectClass=*)(sAMAccountName={0}))'
 ```
 
+#### `LDAPAuthenticator.search_base` ####
+
+The scope where we are looking for the user. If you do not know leave the whole (DC) 
+
+```python
+c.LDAPAuthenticator.user_search_base = 'DC=test,DC=local'
+```
+
 ### Optional configuration ###
 
 #### `LDAPAuthenticator.allowed_groups` ####
