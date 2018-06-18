@@ -106,7 +106,6 @@ class LDAPAuthenticator(Authenticator):
 
         def search_user_dn(connection, search_base, filter, user, attrs=['memberOf']):
             connection.search(search_base=search_base, search_scope=ldap3.SUBTREE, search_filter=filter.format(user), attributes=attrs)
-            print('DEBUG__ search response: {}'.format(connection.response))
             tmp = connection.response.pop()
             dn_ = tmp.get('dn')
             groups = tmp.get('attributes').get('memberOf')
